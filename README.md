@@ -2,34 +2,15 @@
 
 **[Makeability Lab](https://makeabilitylab.cs.washington.edu/)**
 
-<a href="https://xiasu.github.io/"><em>Xia Su</em></a><sup>*</sup>, 
-<strong><em>Ruiqi Chen</em></strong><sup>*</sup>, 
-<a href="https://jingweim.github.io/">Jingwei Ma</a>, 
-<a href="https://www.chu-li.me/">Chu Li</a>, 
-<a href="https://jonfroehlich.github.io/">Jon E. Froehlich</a>  
+[***Xia Su***](https://xiasu.github.io/)<sup>*</sup>, [***Ruiqi Chen***](https://example.com)<sup>*</sup>, [Jingwei Ma](https://jingweim.github.io/), [Chu Li](https://www.chu-li.me/), [Jon E. Froehlich](https://jonfroehlich.github.io/) 
 
-[[`Paper is coming soon`]()] [[`Project`]()] [[`Demo`](https://sam2.metademolab.com/)] [[`Dataset`](https://ai.meta.com/datasets/segment-anything-video)] [[`Blog`](https://ai.meta.com/blog/segment-anything-2)] [[`BibTeX`](#citing-sam-2)]
+[[`Paper is coming soon`]()] [[`Project`]()] [[`Demo`]()] 
 
-![SAM 2 architecture](assets/model_diagram.png?raw=true)
+<!--![SAM 2 architecture](assets/model_diagram.png?raw=true) -->
 
-**Segment Anything Model 2 (SAM 2)** is a foundation model towards solving promptable visual segmentation in images and videos. We extend SAM to video by considering images as a video with a single frame. The model design is a simple transformer architecture with streaming memory for real-time video processing. We build a model-in-the-loop data engine, which improves model and data via user interaction, to collect [**our SA-V dataset**](https://ai.meta.com/datasets/segment-anything-video), the largest video segmentation dataset to date. SAM 2 trained on our data provides strong performance across a wide range of tasks and visual domains.
+**FlyMeThrough** is a description
 
-![SA-V dataset](assets/sa_v_dataset.jpg?raw=true)
 
-## Latest updates
-
-**12/11/2024 -- full model compilation for a major VOS speedup and a new `SAM2VideoPredictor` to better handle multi-object tracking**
-
-- We now support `torch.compile` of the entire SAM 2 model on videos, which can be turned on by setting `vos_optimized=True` in `build_sam2_video_predictor`, leading to a major speedup for VOS inference.
-- We update the implementation of `SAM2VideoPredictor` to support independent per-object inference, allowing us to relax the assumption of prompting for multi-object tracking and adding new objects after tracking starts.
-- See [`RELEASE_NOTES.md`](RELEASE_NOTES.md) for full details.
-
-**09/30/2024 -- SAM 2.1 Developer Suite (new checkpoints, training code, web demo) is released**
-
-- A new suite of improved model checkpoints (denoted as **SAM 2.1**) are released. See [Model Description](#model-description) for details.
-  * To use the new SAM 2.1 checkpoints, you need the latest model code from this repo. If you have installed an earlier version of this repo, please first uninstall the previous version via `pip uninstall SAM-2`, pull the latest code from this repo (with `git pull`), and then reinstall the repo following [Installation](#installation) below.
-- The training (and fine-tuning) code has been released. See [`training/README.md`](training/README.md) on how to get started.
-- The frontend + backend code for the SAM 2 web demo has been released. See [`demo/README.md`](demo/README.md) for details.
 
 ## Installation
 
