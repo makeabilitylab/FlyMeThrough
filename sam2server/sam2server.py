@@ -25,8 +25,8 @@ MASK_DIR = os.path.join(BASE_DIR, "sam2mask")
 RESULTS_DIR = os.path.join(BASE_DIR, "sam2results")  
 
 # Model configuration and checkpoint remain in the original SAM2 folder
-MODEL_CFG = "../SAM2/sam2/configs/sam2.1/sam2.1_hiera_l.yaml"
-CHECKPOINT = "../SAM2/checkpoints/sam2.1_hiera_large.pt"
+MODEL_CFG = "../sam2/sam2/configs/sam2.1/sam2.1_hiera_l.yaml"
+CHECKPOINT = "../sam2/checkpoints/sam2.1_hiera_large.pt"
 
 # Logging
 LOG_DIR = os.path.join(BASE_DIR, "task_logs")
