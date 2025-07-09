@@ -137,7 +137,7 @@ scene_example
 ```
 
 Please note the followings:
-* The **point cloud** should be provided as a `.ply` file and the points are expected to be in the z-up right-handed coordinate system, or at least the same direction as camera poses and intrinsics.
+* The **point cloud** should be provided as a `.ply` or `.obj` file and the points are expected to be in the z-up right-handed coordinate system, or at least the same direction as camera poses and intrinsics.
 * The **camera intrinsics** and **camera poses** should be provided in a `.txt` file, containing a 4x4 matrix.
 * The **RGB images** and the **depths** can be either in `.png`, `.jpg`, `.jpeg` format; the used format should be specified as explained in **Step 3**.
 * The **RGB images** and their corresponding **depths** and **camera poses** should be named as `{FRAME_ID}.extension`, without zero padding for the frame ID, starting from index 00000.
