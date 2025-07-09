@@ -5,37 +5,45 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from sam2.build_sam import build_sam2_video_predictor
 import argparse
+
+# Enable fallback for PyTorch MPS backend
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
-# 🔥 **初始化 PyTorch 设备**
+# 🔥 Initialize PyTorch device
 if torch.cuda.is_available():
     device = torch.device("cuda")
 elif torch.backends.mps.is_available():
     device = torch.device("mps")
 else:
     device = torch.device("cpu")
+
 print(f"Using device: {device}")
 
 if device.type == "cuda":
-    # 使用 bfloat16 精度
+    # Use bfloat16 precision
     torch.autocast("cuda", dtype=torch.bfloat16).__enter__()
-    # 对于 Ampere 及以上 GPU，启用 `TF32`
+    # Enable TF32 for Ampere and later GPUs
     if torch.cuda.get_device_properties(0).major >= 8:
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
+
 elif device.type == "mps":
     print(
-        "\nSupport for MPS devices is preliminary. SAM 2 is trained with CUDA and might "
-        "give numerically different outputs and sometimes degraded performance on MPS. "
-        "See e.g. https://github.com/pytorch/pytorch/issues/84936 for a discussion."
+        "\n⚠️ Support for MPS devices is experimental. SAM 2 is trained with CUDA and might "
+        "produce numerically different outputs and sometimes degraded performance on MPS. "
+        "See: https://github.com/pytorch/pytorch/issues/84936 for details."
     )
 
 
 def load_video_frames(video_dir):
     """
-    加载帧文件名并按索引排序
-    :param frames_dir: 帧存储目录
-    :return: 排序后的帧文件名列表
+    Load frame filenames from a directory and sort them by index.
+
+    Args:
+        video_dir (str): Directory where video frames are stored.
+
+    Returns:
+        list of str: Sorted list of frame filenames.
     """
     frame_names = [
         p for p in os.listdir(video_dir)
@@ -44,19 +52,41 @@ def load_video_frames(video_dir):
     frame_names.sort(key=lambda p: int(os.path.splitext(p)[0]))
     return frame_names
 
+
 def build_index_to_frame_id(frame_names):
+    """
+    Build a mapping from sequential index to frame ID (integer).
+
+    Args:
+        frame_names (list of str): List of frame filenames.
+
+    Returns:
+        dict: Mapping {index: frame_id}.
+    """
     frame_ids = [int(os.path.splitext(name)[0]) for name in frame_names]
     return {i: frame_id for i, frame_id in enumerate(frame_ids)}
 
+
 def load_mask_from_csv(mask_csv_path):
     """
-    从 CSV 文件中加载掩码，并转换为 PyTorch Tensor 格式的二值掩码。
+    Load a mask from a CSV file and convert it into a binary PyTorch tensor.
+
+    Args:
+        mask_csv_path (str): Path to the CSV file containing the mask.
+
+    Returns:
+        tuple:
+            torch.Tensor: Boolean mask tensor of shape (H, W).
+            int: Height of the mask.
+            int: Width of the mask.
     """
+    # load mask data (skip first two header rows)
     data = np.genfromtxt(mask_csv_path, delimiter=',', skip_header=2)
 
     with open(mask_csv_path, 'r') as file:
         lines = file.readlines()
-        width, height = map(int, lines[1].strip().split(','))  # 读取掩码尺寸
+        # read mask dimensions from the second line
+        width, height = map(int, lines[1].strip().split(','))
 
     mask = data.reshape((height, width))
     mask_boolean = mask.astype(bool)
@@ -64,12 +94,20 @@ def load_mask_from_csv(mask_csv_path):
 
     return mask_tensor, height, width
 
+
 def initialize_predictor(model_cfg, sam2_checkpoint, video_path):
     """
-    初始化推理状态
-    :param predictor: 分割模型预测器
-    :param frames_dir: 帧存储目录
-    :return: 推理状态
+    Initialize the SAM2 predictor and inference state.
+
+    Args:
+        model_cfg (str): Path to model configuration file.
+        sam2_checkpoint (str): Path to model checkpoint.
+        video_path (str): Path to the video frames directory or video file.
+
+    Returns:
+        tuple:
+            predictor: Initialized SAM2 predictor.
+            inference_state: Predictor's inference state.
     """
     predictor = build_sam2_video_predictor(model_cfg, sam2_checkpoint, device=device)
     inference_state = predictor.init_state(video_path=video_path)
@@ -79,15 +117,21 @@ def initialize_predictor(model_cfg, sam2_checkpoint, video_path):
 
 def add_new_mask_to_predictor(predictor, inference_state, frame_idx, obj_id, mask_tensor):
     """
-    添加掩码到指定帧
-    :param predictor: 分割模型预测器
-    :param inference_state: 推理状态
-    :param mask_path: 掩码路径
-    :param ann_frame_idx: 帧索引
-    :param ann_obj_id: 对象 ID
-    :return: 输出对象 ID 和掩码 logits
+    Add a mask to the predictor at the specified frame and object ID.
+
+    Args:
+        predictor: SAM2 predictor.
+        inference_state: Current inference state.
+        frame_idx (int): Frame index where the mask is added.
+        obj_id (str): Object ID.
+        mask_tensor (torch.Tensor): Boolean mask tensor of shape (H, W).
+
+    Returns:
+        tuple:
+            out_obj_ids: List of object IDs after addition.
+            out_mask_logits: List of mask logits after addition.
     """
-    """ 在 `SAM2` 预测器中添加新掩码 """
+    # Add a new mask in the SAM2 predictor
     _, out_obj_ids, out_mask_logits = predictor.add_new_mask(
         inference_state=inference_state,
         frame_idx=frame_idx,
@@ -99,10 +143,14 @@ def add_new_mask_to_predictor(predictor, inference_state, frame_idx, obj_id, mas
 
 def propagate_masks(predictor, inference_state):
     """
-    在视频帧中传播掩码
-    :param predictor: 分割模型预测器
-    :param inference_state: 推理状态
-    :return: 包含每帧分割结果的字典
+    Propagate masks throughout the video frames.
+
+    Args:
+        predictor: SAM2 predictor.
+        inference_state: Current inference state.
+
+    Returns:
+        dict: Mapping of frame index to a dict {object_id: binary mask array}.
     """
     video_segments = {}
     for out_frame_idx, out_obj_ids, out_mask_logits in predictor.propagate_in_video(inference_state):
@@ -112,24 +160,50 @@ def propagate_masks(predictor, inference_state):
         }
     return video_segments
 
+
 def downsample_mask(mask, target_count=800):
-    """ 对目标掩码进行降采样，最多保留 `target_count` 个像素点 """
+    """
+    Downsample the target mask to at most `target_count` non-zero pixels.
+
+    Args:
+        mask (np.ndarray): Input mask.
+        target_count (int): Maximum number of pixels to keep.
+
+    Returns:
+        np.ndarray: New mask with at most `target_count` non-zero pixels.
+    """
     non_zero_coords = np.column_stack(np.where(mask > 0))
-    
+
     if len(non_zero_coords) > target_count:
         sampled_indices = np.linspace(0, len(non_zero_coords) - 1, target_count, dtype=int)
         sampled_coords = non_zero_coords[sampled_indices]
     else:
-        sampled_coords = non_zero_coords  # 如果目标少于 800，则不采样
+        # If there are fewer than `target_count` pixels, keep all
+        sampled_coords = non_zero_coords
 
-    # 创建新的降采样掩码
+    # Create a new downsampled mask
     new_mask = np.zeros_like(mask)
     for coord in sampled_coords:
-        new_mask[tuple(coord)] = mask[tuple(coord)]  # 复制原来的标签值
+        new_mask[tuple(coord)] = mask[tuple(coord)]  # preserve original label value
 
     return new_mask
 
+
 def save_filtered_masks(video_segments, index_to_frame_id, base_output_dir, class_id, target_count=800, max_saves=10):
+    """
+    Save filtered masks from video segments to disk, downsampled and limited to max_saves.
+
+    Args:
+        video_segments (dict): Segmentation results from propagate_masks().
+        index_to_frame_id (dict): Mapping from frame index to frame ID.
+        base_output_dir (str): Base directory to save masks.
+        class_id (str): Object/class ID.
+        target_count (int): Max number of pixels per mask.
+        max_saves (int): Max number of masks to save.
+
+    Returns:
+        None
+    """
     output_dir = os.path.join(base_output_dir, class_id)
     os.makedirs(output_dir, exist_ok=True)
 
@@ -169,16 +243,27 @@ def save_filtered_masks(video_segments, index_to_frame_id, base_output_dir, clas
     print(f"Saved {save_count} valid masks into {output_dir}")
 
 
-
 def process_video(video_dir, mask_csv, model_cfg, checkpoint, class_id, ann_frame_id, base_output_dir):
     """
-    运行完整的视频掩码处理流程：
-    1. 初始化 SAM2 预测器
-    2. 读取视频帧并构建映射
-    3. 将原始帧编号映射为 index
-    4. 添加新掩码
-    5. 传播掩码
-    6. 保存有目标的掩码（使用原始编号命名）
+    Run the complete video mask processing pipeline:
+    1. Initialize SAM2 predictor
+    2. Load video frames and build mappings
+    3. Map the original frame ID to index
+    4. Add the initial mask
+    5. Propagate the mask
+    6. Save the masks containing objects (named by original frame IDs)
+
+    Args:
+        video_dir (str): Directory containing video frames.
+        mask_csv (str): Path to the CSV mask file.
+        model_cfg (str): Path to the SAM2 model config file.
+        checkpoint (str): Path to the SAM2 model checkpoint.
+        class_id (str): Class ID for the object being segmented.
+        ann_frame_id (int): Original frame ID where annotation starts.
+        base_output_dir (str): Base directory where output masks will be saved.
+
+    Returns:
+        None
     """
     print("Initializing predictor...")
     predictor, inference_state = initialize_predictor(model_cfg, checkpoint, video_dir)
@@ -186,9 +271,9 @@ def process_video(video_dir, mask_csv, model_cfg, checkpoint, class_id, ann_fram
     print("Loading video frames...")
     frame_names = load_video_frames(video_dir)
     index_to_frame_id = build_index_to_frame_id(frame_names)
-    frame_id_to_index = {v: k for k, v in index_to_frame_id.items()}  # 反向映射
+    frame_id_to_index = {v: k for k, v in index_to_frame_id.items()}  # reverse mapping
 
-    # 🚨 将原始帧编号（如 824）转换为 index
+    # 🚨 Map original frame ID (e.g., 824) to internal index
     if ann_frame_id not in frame_id_to_index:
         raise ValueError(f"Frame ID {ann_frame_id} not found in loaded frames.")
     ann_frame_idx = frame_id_to_index[ann_frame_id]
@@ -196,7 +281,7 @@ def process_video(video_dir, mask_csv, model_cfg, checkpoint, class_id, ann_fram
     print(f"Loading mask from CSV: {mask_csv}")
     mask_tensor, height, width = load_mask_from_csv(mask_csv)
 
-    ann_obj_id = 1  # 统一 obj_id
+    ann_obj_id = 1  # use a fixed object ID
     print(f"Adding new mask at frame index {ann_frame_idx} (original frame {ann_frame_id}) for class_id {class_id}...")
     add_new_mask_to_predictor(predictor, inference_state, ann_frame_idx, ann_obj_id, mask_tensor)
 

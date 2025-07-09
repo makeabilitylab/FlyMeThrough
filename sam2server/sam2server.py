@@ -34,29 +34,38 @@ LOG_FILE = os.path.join(LOG_DIR, "log.txt")
 os.makedirs(LOG_DIR, exist_ok=True)
 
 
-# 任务队列
+# Task queue
 task_queue = queue.Queue()
 running_tasks = set()
-MAX_CONCURRENT_TASKS = 2  # 最多同时运行两个任务
+MAX_CONCURRENT_TASKS = 2  # maximum number of concurrent tasks
 queue_lock = threading.Lock()
 
 log_lock = threading.Lock()
-all_task_timings = []  # 存储每个任务的运行时间段（start, end）
-received_tasks = []  # 存储所有接收到的任务（space_name, object_id, time）
+all_task_timings = []  # store each task's execution time (start, end)
+received_tasks = []    # store all received tasks as (space_name, object_id, time)
+
 
 def log(msg):
+    """
+    Append a log message with timestamp to the log file.
+    """
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with log_lock:
         with open(LOG_FILE, "a", encoding="utf-8") as f:
             f.write(f"[{timestamp}] {msg}\n")
 
+
 def rle_decode(rle, width, height):
     """
-    解码 RLE 并转换为 NumPy 2D 数组
-    :param rle: 运行长度编码 (list of [value, count])
-    :param width: 图像宽度
-    :param height: 图像高度
-    :return: (height, width) 形状的 NumPy 数组，包含 0/1
+    Decode RLE (Run Length Encoding) into a NumPy 2D mask array.
+
+    Args:
+        rle (list of [value, count]): RLE-encoded mask.
+        width (int): Image width.
+        height (int): Image height.
+
+    Returns:
+        np.ndarray: 2D array of shape (height, width) containing 0/1.
     """
     mask_array = np.zeros((height * width), dtype=np.uint8)
     index = 0
@@ -65,9 +74,16 @@ def rle_decode(rle, width, height):
         index += count
     return mask_array.reshape((height, width))
 
-def send_to_diamserver(space_name, object_id, description):
-    """异步发送 space_name 和 object_id 给 DIAMserver"""
 
+def send_to_diamserver(space_name, object_id, description):
+    """
+    Asynchronously send `space_name` and `object_id` to DIAMserver.
+
+    Args:
+        space_name (str): Name of the space.
+        object_id (str): Object ID.
+        description (str): Optional description.
+    """
     print("Sending data to DIAMserver:", space_name, object_id, description)
 
     payload = {
@@ -78,11 +94,21 @@ def send_to_diamserver(space_name, object_id, description):
     try:
         print("Payload sent to DIAMserver:", payload)
         response = requests.post(DIAM_SERVER_URL, json=payload, timeout=5)
-        print("Response from DIAMserver:", response.json())  # 调试输出
+        print("Response from DIAMserver:", response.json())  # debug output
     except requests.exceptions.RequestException as e:
         print("Error sending data to DIAMserver:", e)
 
+
 def merge_intervals(intervals):
+    """
+    Merge overlapping intervals in a list.
+
+    Args:
+        intervals (list of tuple): list of (start, end) datetime tuples.
+
+    Returns:
+        list of tuple: merged non-overlapping intervals.
+    """
     if not intervals:
         return []
     intervals.sort()
@@ -95,7 +121,16 @@ def merge_intervals(intervals):
             merged.append(current)
     return merged
 
+
 def summarize_log():
+    """
+    Write a summary of all tasks and their execution timeline to the log file.
+    Includes:
+    - Total number of tasks received.
+    - Task details (space_name, object_id, time).
+    - Merged task execution intervals.
+    - Total runtime and idle time.
+    """
     with log_lock:
         with open(LOG_FILE, "a", encoding="utf-8") as f:
             f.write("\n================= Summary =================\n")
@@ -113,8 +148,12 @@ def summarize_log():
             f.write(f"Idle Time: {idle_time:.1f} seconds\n")
             f.write("===========================================\n\n")
 
+
 def process_tasks():
-    """持续检查任务队列，并确保最多只有 2 个任务同时运行"""
+    """
+    Continuously monitor the task queue and ensure no more than MAX_CONCURRENT_TASKS
+    are running at the same time.
+    """
     while True:
         with queue_lock:
             if len(running_tasks) < MAX_CONCURRENT_TASKS and not task_queue.empty():
@@ -122,16 +161,24 @@ def process_tasks():
                 space_name = task["space_name"]
                 object_id = task["object_id"]
 
-                running_tasks.add(object_id)  # 标记任务正在运行
+                running_tasks.add(object_id)  # mark task as running
                 print(f"Starting task {object_id}")
 
-                # 启动新线程执行任务
+                # Start a new thread to execute the task
                 threading.Thread(target=run_task, args=(task,)).start()
 
-        time.sleep(1)  # 避免 CPU 过度占用
+        time.sleep(1)  # prevent busy waiting
+
 
 def run_task(task):
-    """执行单个任务"""
+    """
+    Execute a single task:
+    - Decode mask from base64 RLE
+    - Save mask as CSV
+    - Run sam2mask.py and mask2bbox.py
+    - Send result to DIAM server
+    - Log timing and update task queue
+    """
     try:
         space_name = task["space_name"]
         frame_name = task["frame_name"]
@@ -142,10 +189,8 @@ def run_task(task):
         log(f"[RUNNING START] {space_name} | {object_id} | {start_time}")
         print("description:", description, type(description))
 
-
         print(f"Processing task: {task}")
         ann_frame_idx = int(frame_name.split('_')[1].split('.')[0])
-        #ann_frame_idx = int(frame_name)
         frame_filename = f"frame_{ann_frame_idx:04d}.jpg"
 
         video_dir = os.path.join(FRAMES_DIR, space_name)
@@ -155,25 +200,26 @@ def run_task(task):
         os.makedirs(mask_dir, exist_ok=True)
         os.makedirs(output_dir, exist_ok=True)
 
-        # 解码 Base64 RLE
+        # Decode base64 RLE
         decoded_mask = base64.b64decode(mask_base64).decode("utf-8")
         mask_data = json.loads(decoded_mask)
         width, height = mask_data["width"], mask_data["height"]
         rle_encoding = mask_data["encoding"]
         mask_array = rle_decode(rle_encoding, width, height)
 
-        # 保存 CSV
+        # Save mask as CSV
         print(f"Saving mask CSV to: {mask_csv_path}")
         with open(mask_csv_path, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(["width", "height"])
             writer.writerow([width, height])
             writer.writerows(mask_array)
-        # 确保 CSV 文件正确生成
+
+        # Ensure CSV was saved correctly
         if not os.path.exists(mask_csv_path):
             return jsonify({"error": f"Mask CSV not found at {mask_csv_path}"}), 500
 
-        # 运行 sam2mask.py
+        # Run sam2mask.py
         cmd_sam2mask = [
             "python", "sam2mask.py",
             "--video_dir", video_dir,
@@ -186,7 +232,7 @@ def run_task(task):
         ]
         subprocess.run(cmd_sam2mask, check=True)
 
-        # 运行 mask2bbox.py
+        # Run mask2bbox.py
         cmd_mask2bbox = [
             "python", "mask2bbox.py",
             "--space_name", space_name,
@@ -195,16 +241,15 @@ def run_task(task):
         ]
         subprocess.run(cmd_mask2bbox, check=True)
 
-        # 获取 JSON 结果文件
+        # Verify JSON result
         json_path = os.path.join(output_dir, object_id, "bbox_results.json")
         if not os.path.exists(json_path):
             print(f"Error: JSON file not found for {object_id}")
             return
         print(f"Task {object_id} completed. Result stored at {json_path}")
-        
-        # **异步通知 DIAM 服务器**
-        threading.Thread(target=send_to_diamserver, args=(space_name, object_id, description)).start()
 
+        # Notify DIAM server asynchronously
+        threading.Thread(target=send_to_diamserver, args=(space_name, object_id, description)).start()
 
     except Exception as e:
         print(f"Error processing task {object_id}: {e}")
@@ -215,12 +260,12 @@ def run_task(task):
         log(f"[RUNNING END] {space_name} | {object_id} | {end_time} | duration: {duration:.1f}s")
         all_task_timings.append((start_time, end_time))
 
-        # 任务完成，从运行任务集合中移除
+        # Remove task from running set
         with queue_lock:
-            running_tasks.discard(object_id)  # ✅ 使用 `discard()` 避免 KeyError
+            running_tasks.discard(object_id)  # ✅ use discard() to avoid KeyError
             print(f"Task {object_id} finished. Remaining running tasks: {len(running_tasks)}")
 
-            # **检查队列，看看是否可以启动新的任务**
+            # Check if we can start a new task
             if len(running_tasks) < MAX_CONCURRENT_TASKS and not task_queue.empty():
                 next_task = task_queue.get()
                 running_tasks.add(next_task["object_id"])
@@ -229,21 +274,38 @@ def run_task(task):
                 summarize_log()
 
 
+SPACE_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Data"))
 
-
-
-SPACE_FOLDER = r"C:\Users\xiasu\Desktop\Ruiqi_DIAM\Data"
-
-# 加载 Space 数据
+# Load Space data
 class Space:
     def __init__(self, name, image, ply_file, json_files):
+        """
+        Represents a space with its associated data.
+
+        Args:
+            name (str): Name of the space.
+            image (str): Filename of the first image found in the frame folder.
+            ply_file (str): Filename of the first .ply file found.
+            json_files (dict): Dictionary of parsed JSON files in bbox_results.
+        """
         self.name = name
         self.image = image
         self.ply_file = ply_file
         self.json_files = json_files
 
+
 def load_spaces():
-    """遍历 SPACE_FOLDER 目录，动态加载 Space 数据"""
+    """
+    Traverse the SPACE_FOLDER directory and dynamically load Space data.
+
+    For each subfolder:
+    - Find the first image (*.png or *.jpg) in the 'frame' folder.
+    - Find the first .ply file in the space folder.
+    - Parse all .json files in the 'bbox_results' folder.
+
+    Returns:
+        list of Space: list of loaded Space objects, sorted by name descending.
+    """
     spaces = []
 
     if not os.path.exists(SPACE_FOLDER):
@@ -253,16 +315,22 @@ def load_spaces():
     for space_name in os.listdir(SPACE_FOLDER):
         space_path = os.path.join(SPACE_FOLDER, space_name)
         if os.path.isdir(space_path):
-            # 图像路径：{SPACE_FOLDER}/{name}/frame/*.png 或 *.jpg
+            # Image path: {SPACE_FOLDER}/{name}/frame/*.png or *.jpg
             frame_path = os.path.join(space_path, "frame")
-            images = [f for f in os.listdir(frame_path) if f.endswith(('.png', '.jpg'))] if os.path.exists(frame_path) else []
-            image = images[0] if images else None  # 取第一张图片
+            images = [
+                f for f in os.listdir(frame_path)
+                if f.endswith(('.png', '.jpg'))
+            ] if os.path.exists(frame_path) else []
+            image = images[0] if images else None  # take the first image if available
 
-            # PLY 文件路径：{SPACE_FOLDER}/{name}/*.ply
-            ply_files = [f for f in os.listdir(space_path) if f.endswith('.ply')]
-            ply_file = ply_files[0] if ply_files else None  # 取第一个 .ply 文件
+            # PLY file path: {SPACE_FOLDER}/{name}/*.ply
+            ply_files = [
+                f for f in os.listdir(space_path)
+                if f.endswith('.ply')
+            ]
+            ply_file = ply_files[0] if ply_files else None  # take the first .ply file if available
 
-            # JSON 文件路径：{SPACE_FOLDER}/{name}/bbox_results/*.json
+            # JSON files path: {SPACE_FOLDER}/{name}/bbox_results/*.json
             bbox_results_path = os.path.join(space_path, "bbox_results")
             json_files = {}
 
@@ -272,7 +340,8 @@ def load_spaces():
                         json_file_path = os.path.join(bbox_results_path, json_file)
                         try:
                             with open(json_file_path, 'r', encoding="utf-8") as f:
-                                json_files[json_file] = json.load(f)  # ✅ 解析 JSON 文件内容并存入字典
+                                # parse JSON file content and store in dictionary
+                                json_files[json_file] = json.load(f)
                         except json.JSONDecodeError:
                             print(f"⚠️ Warning: {json_file} in {space_name} is not a valid JSON file.")
 
@@ -280,19 +349,24 @@ def load_spaces():
                 space = Space(space_name, image, ply_file, json_files)
                 spaces.append(space)
 
-    spaces.sort(key=lambda x: x.name, reverse=True)  # 按名称降序排序
+    # sort spaces by name in descending order
+    spaces.sort(key=lambda x: x.name, reverse=True)
     return spaces
-
-
 
 
 @app.route('/')
 def home():
+    """
+    Health check route.
+    """
     return jsonify({"message": "Flask server is running!"})
+
 
 @app.route('/process', methods=['POST'])
 def process():
-    """接收前端请求并加入任务队列"""
+    """
+    Receive a request from the frontend and add it to the task queue.
+    """
     try:
         data = request.get_json()
         space_name = data.get("space_name")
@@ -310,59 +384,66 @@ def process():
         print(f"Task {object_id} received and added to queue.")
 
         with queue_lock:
-            task_queue.put(data)  # 把任务加入队列
+            task_queue.put(data)  # add task to queue
             print(f"Task {object_id} added to queue. Queue size: {task_queue.qsize()}")
-            # **检查是否可以立即执行任务**
+            # check if a task can be started immediately
             if len(running_tasks) < MAX_CONCURRENT_TASKS:
                 next_task = task_queue.get()
                 running_tasks.add(next_task["object_id"])
                 threading.Thread(target=run_task, args=(next_task,)).start()
-        
+
         def wait_for_task_completion():
-            """保持 HTTP 连接，等待任务完成后返回 JSON 文件"""
+            """
+            Keep the HTTP connection open and wait until the task completes,
+            then return the resulting JSON file.
+            """
             output_dir = os.path.join(RESULTS_DIR, space_name)
             json_path = os.path.join(output_dir, object_id, "bbox_results.json")
 
-            # **等待任务完成**
+            # wait until the task produces the JSON file
             while not os.path.exists(json_path):
-                time.sleep(0.5)  # 每 500ms 检查一次是否生成 JSON 文件
-                yield "" 
+                time.sleep(0.5)  # check every 500ms
+                yield ""
 
             print(f"Task {object_id} completed. Sending file to client.")
 
-            # **返回 JSON 结果**
+            # return the JSON result
             with open(json_path, "r") as file:
                 yield file.read()
 
-        # **使用 `Response` 保持连接，直到任务完成**
+        # use Response to keep the connection alive until the task completes
         return Response(wait_for_task_completion(), content_type='application/json')
-
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
 
 
-# API: 获取所有 Space 列表
+
+# API: Get the list of all Spaces
 @app.route('/spaces', methods=['GET'])
 def get_spaces():
-    """获取 Space 列表，确保每次请求时重新加载数据"""
+    """
+    Get the list of all Spaces, reloading data from disk on every request.
+    """
     spaces = load_spaces()
     space_list = [
         {
             "name": space.name,
             "image": space.image,
-            "ply_file": space.ply_file,  # ✅ 确保返回 ply 文件路径
+            "ply_file": space.ply_file,  # include .ply file path
             "json_files": space.json_files
         }
         for space in spaces
     ]
     return jsonify(space_list)
 
-# API: 获取指定 Space 的详细信息
+
+# API: Get details of a specific Space
 @app.route('/space_details/<space_name>', methods=['GET'])
 def get_space_details(space_name):
-    """获取特定 Space 详细信息，每次调用时重新读取本地数据"""
+    """
+    Get details of a specific Space by name, reloading data from disk on every request.
+    """
     spaces = load_spaces()
     for space in spaces:
         if space.name == space_name:
@@ -375,19 +456,25 @@ def get_space_details(space_name):
 
     return jsonify({"error": "Space not found"}), 404
 
-# API: 访问 Space 目录中的图片（frame 目录）
+
+# API: Serve an image file from a Space's 'frame' folder
 @app.route('/images/<space_name>/<image_name>', methods=['GET'])
 def serve_image(space_name, image_name):
-    """提供 Space 相关图片（frame 目录下的 .png/.jpg 文件）"""
+    """
+    Serve an image file (.png/.jpg) from the 'frame' folder of a Space.
+    """
     image_path = os.path.join(SPACE_FOLDER, space_name, "frame")
     if os.path.exists(os.path.join(image_path, image_name)):
         return send_from_directory(image_path, image_name)
     return jsonify({"error": "Image not found"}), 404
 
-# API: 访问 Space 目录中的 .ply 和 .json 文件
+
+# API: Serve a .ply or .json file from a Space directory
 @app.route('/files/<space_name>/<file_name>', methods=['GET'])
 def serve_file(space_name, file_name):
-    """提供 Space 相关文件（.ply 位于 Space 根目录，.json 位于 bbox_results 目录）"""
+    """
+    Serve a .ply file (from Space root) or a .json file (from bbox_results folder).
+    """
     ply_path = os.path.join(SPACE_FOLDER, space_name, file_name)
     json_path = os.path.join(SPACE_FOLDER, space_name, "bbox_results", file_name)
 
@@ -401,20 +488,26 @@ def serve_file(space_name, file_name):
 
 @app.route('/get_result', methods=['GET'])
 def get_result():
+    """
+    Retrieve the final bbox_results.json file for a given space and object.
+    """
     space_name = request.args.get("space_name")
     object_id = request.args.get("object_id")
-    
+
     if not all([space_name, object_id]):
         return jsonify({"error": "Missing parameters"}), 400
-    
+
     output_dir = os.path.join(RESULTS_DIR, space_name)
     json_path = os.path.join(output_dir, "bbox_results.json")
-    
+
     if not os.path.exists(json_path):
         return jsonify({"error": "No JSON file found"}), 404
-    
+
     return send_file(json_path, as_attachment=True)
 
+
 if __name__ == '__main__':
-    threading.Thread(target=process_tasks, daemon=True).start()  # 启动任务管理线程
+    # Start the background task management thread
+    threading.Thread(target=process_tasks, daemon=True).start()
+    # Start the Flask server
     app.run(host='0.0.0.0', port=80, debug=True)
