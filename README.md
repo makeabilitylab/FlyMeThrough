@@ -43,6 +43,7 @@ cd ..  # go back to the project root
 
 git clone https://github.com/apple/ml-depth-pro.git && cd ml-depth-pro
 pip install -e .
+cd ..  # go back to the project root
 ```
 
 If you are installing on Windows, it's strongly recommended to use [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install) with Ubuntu.
@@ -65,11 +66,15 @@ Note:
 
 ### Download Checkpoints
 
-First, we need to download a model checkpoint. All the model checkpoints can be downloaded by running:
+First, we need to download the model checkpoint. All the model checkpoints can be downloaded by running:
 
 ```bash
-cd checkpoints && \
+cd sam2/checkpoints && \
 ./download_ckpts.sh && \
+cd ../..
+
+cd ml-depth-pro
+source get_pretrained_models.sh  # Files will be downloaded to `checkpoints` directory.
 cd ..
 ```
 
@@ -80,7 +85,6 @@ or individually from:
 - [sam2.1_hiera_base_plus.pt](https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_base_plus.pt)
 - [sam2.1_hiera_large.pt](https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt)
 
-(note that these are the improved checkpoints denoted as SAM 2.1; see [Model Description](#model-description) for details.)
 
 
 
@@ -103,3 +107,10 @@ If you use FlyMeThrough or the structure in your research, please use the follow
   location     = {Busan, Republic of Korea}
 }
 ```
+
+## TODO
+
+We plan to release the complete scripts to this repository shortly, including:  
+- The annotation and visualization interfaces code of *FlyMeThrough*.  
+- The algorithms and implementation for *FlyMeThrough* 3D mapping of indoor spaces.
+
