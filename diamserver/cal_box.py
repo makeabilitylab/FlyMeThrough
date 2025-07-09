@@ -7,15 +7,26 @@ from sklearn.decomposition import PCA
 
 def process_and_save_bbox(space_name, object_id, description, eps=0.2, min_samples=3):
     """
-    处理指定空间和对象 ID 的点云数据，并保存单个最大 bounding box 信息为 JSON 文件。
-    
-    参数：
-    space_name (str): 处理的空间名称。
-    object_id (str): 目标对象的 ID。
-    eps (float): DBSCAN 聚类的邻域半径。
-    min_samples (int): DBSCAN 聚类的最小样本数。
+    Process the point cloud data of the specified space and object ID,
+    and save the largest bounding box information as a JSON file.
+
+    Args:
+        space_name (str): Name of the space to process.
+        object_id (str): Target object ID.
+        description (str): Description of the object.
+        eps (float): DBSCAN neighborhood radius.
+        min_samples (int): Minimum number of samples for DBSCAN clustering.
     """
     def load_label_points(class_id):
+        """
+        Load the labeled point cloud data of a specific class.
+
+        Args:
+            class_id (str): The class ID to load.
+
+        Returns:
+            dict or None: A dictionary of labeled points if exists, otherwise None.
+        """
         file_path = os.path.join(f'../Data/{space_name}/castresults', f"{class_id}_label_points.npy")
         if not os.path.exists(file_path):
             print(f"Error: {file_path} does not exist.")
@@ -23,6 +34,15 @@ def process_and_save_bbox(space_name, object_id, description, eps=0.2, min_sampl
         return np.load(file_path, allow_pickle=True).item()
 
     def compute_obb(points):
+        """
+        Compute the oriented bounding box (OBB) of the given point cloud using PCA.
+
+        Args:
+            points (np.ndarray): The point cloud data.
+
+        Returns:
+            tuple: (obb_corners, center, axes), where each is a list.
+        """
         pca = PCA(n_components=3)
         pca.fit(points)
         center = np.mean(points, axis=0)
@@ -90,5 +110,3 @@ def process_and_save_bbox(space_name, object_id, description, eps=0.2, min_sampl
     
     print(f"Bounding box data saved to {output_path}")
 
-# 示例调用
-# process_and_save_bbox("OceanTeachBuilding", "door1")

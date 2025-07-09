@@ -58,4 +58,3 @@ def save_merged_data(space_name):
     return output_path
 
 
-# save_merged_data("OceanTeachBuilding")
