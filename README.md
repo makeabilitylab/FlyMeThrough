@@ -18,7 +18,7 @@ This repo accompanies our UIST 2025 paper:
 
 <!--![SAM 2 architecture](assets/model_diagram.png?raw=true) -->
 
-**FlyMeThrough** is a description
+**FlyMeThrough** is a description here
 
 
 
@@ -62,9 +62,15 @@ Note:
 
 
 
-## Getting Started
+## Run the pipeline on a single scene
 
-### Download Checkpoints
+In this section, we provide information on how to run the pipeline for a single scene. In particular, we divide this section into four parts:
+1. Download **checkpoints**
+2. Check the format of **scene's data**
+3. Set up **configurations** 
+4. **Run** FlyMeThrough 
+
+### Step 1: Download Checkpoints
 
 First, we need to download the model checkpoint. All the model checkpoints can be downloaded by running:
 
@@ -85,10 +91,39 @@ or individually from:
 - [sam2.1_hiera_base_plus.pt](https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_base_plus.pt)
 - [sam2.1_hiera_large.pt](https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt)
 
+### Step 2: Check the folder structure of the data for your scene 
+In order to run FlyMeThrough you need to have access to the point cloud of the scene as well to the posed RGB-D frames.
+
+We recommend creating a folder `scene_example` inside the `flymethrough` folder where the data is saved. 
+```
+scene_example
+      ├── pose                            <- folder with camera poses
+      │      ├── 0.txt 
+      │      ├── 1.txt 
+      │      └── ...  
+      ├── frame                           <- folder with RGB images
+      │      ├── 0.jpg (or .png/.jpeg)
+      │      ├── 1.jpg (or .png/.jpeg)
+      │      └── ...  
+      ├── depth                           <- folder with depth images
+      │      ├── 0.png (or .jpg/.jpeg)
+      │      ├── 1.png (or .jpg/.jpeg)
+      │      └── ...  
+      ├── intrinsic                 
+      │      └── intrinsic_color.txt       <- camera intrinsics
+      └── scene_example.ply                <- point cloud of the scene
+```
+
+Please note the followings:
+* The **point cloud** should be provided as a `.ply` file and the points are expected to be in the z-up right-handed coordinate system.
+* The **camera intrinsics** and **camera poses** should be provided in a `.txt` file, containing a 4x4 matrix.
+* The **RGB images** and the **depths** can be either in `.png`, `.jpg`, `.jpeg` format; the used format should be specified as explained in **Step 3**.
+* The **RGB images** and their corresponding **depths** and **camera poses** should be named as `{FRAME_ID}.extension`, without zero padding for the frame ID, starting from index 0.
 
 
+## Acknowledgments
 
-
+We would like to thank the authors of [SAM2](https://github.com/facebookresearch/sam2) and [Depth-Pro](https://github.com/apple/ml-depth-pro) for their works which were used for our model.
 
 
 
