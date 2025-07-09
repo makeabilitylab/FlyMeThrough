@@ -15,19 +15,24 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
+# URL of the DIAM server
 DIAM_SERVER_URL = "http://127.0.0.1:5001/receive_data"
 
-# 设置本地路径
+# Set base data directories (pointing to the Data folder parallel to diamserver)
 BASE_DIR = "../Data"
-FRAMES_DIR = os.path.join(BASE_DIR, "frames")
-MASK_DIR = os.path.join(BASE_DIR, "mask")
-RESULTS_DIR = os.path.join(BASE_DIR, "results")
-MODEL_CFG = "../sam2/configs/sam2.1/sam2.1_hiera_l.yaml"
-CHECKPOINT = "../checkpoints/sam2.1_hiera_large.pt"
+FRAMES_DIR = os.path.join(BASE_DIR, "frame")
+MASK_DIR = os.path.join(BASE_DIR, "sam2mask")        
+RESULTS_DIR = os.path.join(BASE_DIR, "sam2results")  
 
+# Model configuration and checkpoint remain in the original SAM2 folder
+MODEL_CFG = "../SAM2/sam2/configs/sam2.1/sam2.1_hiera_l.yaml"
+CHECKPOINT = "../SAM2/checkpoints/sam2.1_hiera_large.pt"
+
+# Logging
 LOG_DIR = os.path.join(BASE_DIR, "task_logs")
 LOG_FILE = os.path.join(LOG_DIR, "log.txt")
 os.makedirs(LOG_DIR, exist_ok=True)
+
 
 # 任务队列
 task_queue = queue.Queue()
