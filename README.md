@@ -18,7 +18,7 @@ This repo accompanies our UIST 2025 paper:
 
 <!--![SAM 2 architecture](assets/model_diagram.png?raw=true) -->
 
-**FlyMeThrough** is a description here
+**FlyMeThrough** is a description here (will be added after paper public)
 
 
 
