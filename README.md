@@ -176,4 +176,9 @@ If you use FlyMeThrough or the structure in your research, please use the follow
 We plan to release the complete scripts to this repository shortly, including:  
 - The annotation and visualization interfaces code of *FlyMeThrough*.  
 
+## Contact
+
+If you have any questions or encounter any issues, please feel free to open an [issue](../../issues) on this repository,  
+or contact the co-first author **Ruiqi Chen** directly.
+
 
