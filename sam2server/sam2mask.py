@@ -227,20 +227,8 @@ if __name__ == "__main__":
     model_cfg=args.model_cfg,
     checkpoint=args.checkpoint,
     class_id=args.class_id,
-    ann_frame_id=args.ann_frame_idx,  # 👈 改这里
+    ann_frame_id=args.ann_frame_idx,  
     base_output_dir=args.output_dir,
 )
 
-
-#if __name__ == "__main__":
-    # 配置路径和参数
-    #video_dir = "../Data/frames/OceanTeachingBuilding"  # 视频帧目录
-    #mask_csv = "../Data/mask/OceanTeachingBuilding/mask.csv"
-    #model_cfg = "../sam2/configs/sam2.1/sam2.1_hiera_l.yaml"
-    #checkpoint = "../checkpoints/sam2.1_hiera_large.pt"
-    #class_id = "test"  # `class_id` 既是类别 ID，也是 `ann_obj_id`
-    #ann_frame_idx = 32  # 指定初始帧
-    #output_dir="../Data/results/OceanTeachingBuilding"
-
-    #process_video(video_dir, mask_csv, model_cfg, checkpoint, class_id, ann_frame_idx, output_dir)
 
