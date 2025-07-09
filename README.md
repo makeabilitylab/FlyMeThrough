@@ -152,8 +152,8 @@ In particular, you should adjust the following component:
 ```bash
 python diamserver/run_depth.py
 ```
-  This script will take your frames from the `frame` folder as input and output the corresponding `depth.npz` file into the `depth` folder.
-  If you prefer to use your own depth data like in `depth.png` format, please modify `diamserver/edit_segdep.py`, which is responsible for combining the segmentation data from **SAM2** and the depth data from **Depth-Pro**. You should      adjust this module to correctly load and integrate your custom depth data into the pipeline.
+    This script will take your frames from the `frame` folder as input and output the corresponding `depth.npz` file into the `depth` folder.
+  If you prefer to use your own depth data like in `depth.png` format, please modify `diamserver/edit_segdep.py`, which is responsible for combining the segmentation data from **SAM2** and   the depth data from **Depth-Pro**. You should      adjust this module to correctly load and integrate your custom depth data into the pipeline.
 
 ### Step 4: Run FlyMeThrough
 Now you can run **FlyMeThrough** using the following commands:
