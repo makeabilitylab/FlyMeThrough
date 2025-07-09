@@ -65,7 +65,7 @@ def process_task():
 
             # Set up paths
             depth_folder = f'../Data/{space_name}/depth'
-            segmentation_folder = f'../SAM2/Data/results/{space_name}/{object_id}'
+            segmentation_folder = f'../Data/{space_name}/sam2results/{object_id}'
             segdep_folder = f'../Data/{space_name}/segdep/{object_id}'
 
             # Check if segmentation folder exists and contains .npy files
