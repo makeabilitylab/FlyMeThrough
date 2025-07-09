@@ -2,7 +2,9 @@
 
 **[Makeability Lab](https://makeabilitylab.cs.washington.edu/)**
 
-[*Xia Su*](https://xiasu.github.io/)⁎, [*Ruiqi Chen*](https://example.com)⁎, [Jingwei Ma](https://jingweim.github.io/), [Chu Li](https://www.chu-li.me/), [Jon E. Froehlich](https://jonfroehlich.github.io/) 
+[*Xia Su*](https://xiasu.github.io/)*, [*Ruiqi Chen*](https://example.com)*, [Jingwei Ma](https://jingweim.github.io/), [Chu Li](https://www.chu-li.me/), [Jon E. Froehlich](https://jonfroehlich.github.io/) 
+
+( **<sup>*</sup>** means Equal Contribution)
 
 [[`Paper is coming soon`]()] [[`Project`]()] [[`Demo`]()] 
 
