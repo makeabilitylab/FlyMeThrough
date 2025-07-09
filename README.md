@@ -1,12 +1,26 @@
-# FlyMeThrough: Human-AI Collaborative 3D Indoor Mapping with Commodity Drones
+<p align="center">
 
-**[Makeability Lab](https://makeabilitylab.cs.washington.edu/)**
+<h1 align="center">FlyMeThrough: Human-AI Collaborative 3D Indoor Mapping with Commodity Drones</h1>
 
-[*Xia Su*](https://xiasu.github.io/) *, [*Ruiqi Chen*]((https://ruiqi-chen-0216.github.io/)) *, [Jingwei Ma](https://jingweim.github.io/), [Chu Li](https://www.chu-li.me/), [Jon E. Froehlich](https://jonfroehlich.github.io/) 
+<p align="center">
+  <a href="https://xiasu.github.io/">Xia Su</a><sup>*</sup>,
+  <a href="https://ruiqi-chen-0216.github.io/">Ruiqi Chen</a><sup>*</sup>,
+  <a href="https://jingweim.github.io/">Jingwei Ma</a>,
+  <a href="https://www.chu-li.me/">Chu Li</a>,
+  <a href="https://jonfroehlich.github.io/">Jon E. Froehlich</a>
+  <br>
+  <a href="https://makeabilitylab.cs.washington.edu/"><strong>Makeability Lab</strong></a>, University of Washington
+  <br>
+  <sup>*</sup>equal contribution
+</p>
 
-( **<sup>*</sup>** means Equal Contribution)
+<h2 align="center">Paper coming soon</h2>
 
-[[`Paper is coming soon`]()] [[`Project`]()] [[`Demo`]()] 
+<h3 align="center">
+  <a href="#">Paper</a> | <a href="#">Project</a> | <a href="#">Demo</a>
+</h3>
+
+</p>
 
 This repo accompanies our UIST 2025 paper:
 
