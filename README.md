@@ -39,13 +39,20 @@ The code requires `python>=3.10`, as well as `torch>=2.5.1` and `torchvision>=0.
 git clone https://github.com/facebookresearch/sam2.git && cd sam2
 pip install -e .
 
+cd ..  # go back to the project root
+
 git clone https://github.com/apple/ml-depth-pro.git && cd ml-depth-pro
 pip install -e .
 ```
 
 If you are installing on Windows, it's strongly recommended to use [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install) with Ubuntu.
 
+After installing **SAM2** and **Depth-Pro**, you also need to install the dependencies specific to this project.  
 
+
+```bash
+pip install -r requirements.txt
+```
 
 Note:
 1. It's recommended to create a new Python environment via [Anaconda](https://www.anaconda.com/) for this installation and install PyTorch 2.5.1 (or higher) via `pip` following https://pytorch.org/. If you have a PyTorch version lower than 2.5.1 in your current environment, the installation command above will try to upgrade it to the latest PyTorch version using `pip`.
@@ -75,34 +82,10 @@ or individually from:
 
 (note that these are the improved checkpoints denoted as SAM 2.1; see [Model Description](#model-description) for details.)
 
-Then SAM 2 can be used in a few lines as follows for image and video prediction.
 
 
 
-### Video prediction
 
-For promptable segmentation and tracking in videos, we provide a video predictor with APIs for example to add prompts and propagate masklets throughout a video. SAM 2 supports video inference on multiple objects and uses an inference state to keep track of the interactions in each video.
-
-```python
-import torch
-from sam2.build_sam import build_sam2_video_predictor
-
-checkpoint = "./checkpoints/sam2.1_hiera_large.pt"
-model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
-predictor = build_sam2_video_predictor(model_cfg, checkpoint)
-
-with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
-    state = predictor.init_state(<your_video>)
-
-    # add new prompts and instantly get the output on the same frame
-    frame_idx, object_ids, masks = predictor.add_new_points_or_box(state, <your_prompts>):
-
-    # propagate the prompts to get masklets throughout the video
-    for frame_idx, object_ids, masks in predictor.propagate_in_video(state):
-        ...
-```
-
-Please refer to the examples in [video_predictor_example.ipynb](./notebooks/video_predictor_example.ipynb) (also in Colab [here](https://colab.research.google.com/github/facebookresearch/sam2/blob/main/notebooks/video_predictor_example.ipynb)) for details on how to add click or box prompts, make refinements, and track multiple objects in videos.
 
 
 ## Citing FlyMeThrough
