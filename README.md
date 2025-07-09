@@ -21,7 +21,7 @@ This repo accompanies our UIST 2025 paper:
 
 **FlyMeThrough** is a human-AI collaborative indoor mapping system that provides an end-to-end pipeline for transforming RGB footage of indoor drone flights to POI-infused 3D reconstructed maps of the scanned indoor spaces. FlyMeThrough contains three major technical components: SfM (Structure from Motion)-based 3D reconstruction that transforms input RGB videos to estimated camera positions of video frames as well as 3D mesh models of the indoor spaces; A human-AI collaborative annotation pipeline that enables users to efficiently annotate and locate key indoor POIs; A web interface that reviews the final results, which are 3D models with bounding boxes indicating the locations and dimensions of key indoor POIs
 
-
+---
 
 ## Installation
 
