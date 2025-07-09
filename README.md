@@ -2,9 +2,17 @@
 
 **[Makeability Lab](https://makeabilitylab.cs.washington.edu/)**
 
-[***Xia Su***](https://xiasu.github.io/)<sup>*</sup>, [***Ruiqi Chen***](https://example.com)<sup>*</sup>, [Jingwei Ma](https://jingweim.github.io/), [Chu Li](https://www.chu-li.me/), [Jon E. Froehlich](https://jonfroehlich.github.io/) 
+[*Xia Su*](https://xiasu.github.io/)⁎, [*Ruiqi Chen*](https://example.com)⁎, [Jingwei Ma](https://jingweim.github.io/), [Chu Li](https://www.chu-li.me/), [Jon E. Froehlich](https://jonfroehlich.github.io/) 
 
 [[`Paper is coming soon`]()] [[`Project`]()] [[`Demo`]()] 
+
+This repo accompanies our UIST 2025 paper:
+
+> **FlyMeThrough: Human-AI Collaborative 3D Indoor Mapping with Commodity Drones**
+> *Xia Su, Ruiqi Chen, Jingwei Ma, Chu Li, Jon E. Froehlich*
+> In *Proceedings of the 38th Annual ACM Symposium on User Interface Software and Technology (UIST ’25)*
+> Busan, Republic of Korea, September 28–October 1, 2025.
+> DOI: [10.1145/XXXXX](https://doi.org/10.1145/XXXXXX)
 
 <!--![SAM 2 architecture](assets/model_diagram.png?raw=true) -->
 
