@@ -14,7 +14,7 @@
   <sup>*</sup>equal contribution
 </p>
 
-<h2 align="center">Paper coming soon</h2>
+<h2 align="center">UIST 2025</h2>
 
 <h3 align="center">
   <a href="#">Paper</a> | <a href="#">Project</a> | <a href="#">Demo</a>
