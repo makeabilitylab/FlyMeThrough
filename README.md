@@ -16,7 +16,7 @@ This repo accompanies our UIST 2025 paper:
 > Busan, Republic of Korea, September 28–October 1, 2025.
 > DOI: [10.1145/XXXXX](https://doi.org/10.1145/XXXXXX)
 
-<!--![SAM 2 architecture](assets/model_diagram.png?raw=true) -->
+![FlyMeThrough pipeline](assets/FlyMeThrough.png)
 
 **FlyMeThrough** is a description here (will be added after paper public)
 
