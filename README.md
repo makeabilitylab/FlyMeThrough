@@ -219,10 +219,6 @@ If you use FlyMeThrough or the structure in your research, please use the follow
 }
 ```
 
-## TODO
-
-We plan to release the complete scripts to this repository shortly, including:  
-- The annotation and visualization interfaces code of *FlyMeThrough*.  
 
 ## Contact
 
