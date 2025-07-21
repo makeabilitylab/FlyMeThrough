@@ -3,21 +3,23 @@
 <h1 align="center">FlyMeThrough: Human-AI Collaborative 3D Indoor Mapping with Commodity Drones</h1>
 
 <p align="center">
-  <a href="https://xiasu.github.io/">Xia Su</a><sup>*</sup>,
-  <a href="https://ruiqi-chen-0216.github.io/">Ruiqi Chen</a><sup>*</sup>,
-  <a href="https://jingweim.github.io/">Jingwei Ma</a>,
-  <a href="https://www.chu-li.me/">Chu Li</a>,
-  <a href="https://jonfroehlich.github.io/">Jon E. Froehlich</a>
+  <a href="https://xiasu.github.io/">Xia Su</a><sup>1,2,*</sup>,
+  <a href="https://ruiqi-chen-0216.github.io/">Ruiqi Chen</a><sup>1,2,*</sup>,
+  <a href="https://jingweim.github.io/">Jingwei Ma</a><sup>2</sup>,
+  <a href="https://www.chu-li.me/">Chu Li</a><sup>1,2</sup>,
+  <a href="https://jonfroehlich.github.io/">Jon E. Froehlich</a><sup>1,2</sup>
   <br>
-  <a href="https://makeabilitylab.cs.washington.edu/"><strong>Makeability Lab</strong></a>, University of Washington
+  <sup>1</sup> <a href="https://makeabilitylab.cs.washington.edu/"><strong>Makeability Lab</strong></a>, <sup>2</sup> University of Washington
   <br>
-  <sup>*</sup>equal contribution
+  <sup>*</sup>Equal contribution
 </p>
+
+
 
 <h2 align="center">UIST 2025</h2>
 
 <h3 align="center">
-  <a href="#">Paper</a> | <a href="#">Project</a> | <a href="#">Demo</a>
+  <a href="#">Paper</a> | <a href="#">Project</a>
 </h3>
 
 </p>
