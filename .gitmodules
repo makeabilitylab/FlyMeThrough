@@ -4,3 +4,9 @@
 [submodule "sam2"]
 	path = sam2
 	url = https://github.com/facebookresearch/sam2.git
+[submodule "flymethrough-webdemo"]
+	path = flymethrough-webdemo
+	url = https://github.com/XiaSu0919/flymethrough-webdemo.git
+[submodule "flymethrough-annotator"]
+	path = flymethrough-annotator
+	url = https://github.com/makeabilitylab/flymethrough-annotator.git
