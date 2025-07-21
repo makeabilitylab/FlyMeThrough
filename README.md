@@ -9,12 +9,11 @@
   <a href="https://www.chu-li.me/">Chu Li</a><sup>1,2</sup>,
   <a href="https://jonfroehlich.github.io/">Jon E. Froehlich</a><sup>1,2</sup>
   <br>
-  <sup>1</sup> <a href="https://makeabilitylab.cs.washington.edu/"><strong>Makeability Lab</strong></a>
-  <br>
-  <sup>2</sup> University of Washington
+  <sup>1</sup> <a href="https://makeabilitylab.cs.washington.edu/"><strong>Makeability Lab</strong></a>, <sup>2</sup> University of Washington
   <br>
   <sup>*</sup>Equal contribution
 </p>
+
 
 
 <h2 align="center">UIST 2025</h2>
