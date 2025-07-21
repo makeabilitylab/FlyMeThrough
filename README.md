@@ -79,6 +79,32 @@ Note:
 2. The step above requires compiling a custom CUDA kernel with the `nvcc` compiler. If it isn't already available on your machine, please install the [CUDA toolkits](https://developer.nvidia.com/cuda-toolkit-archive) with a version that matches your PyTorch CUDA version.
 3. If you see a message like `Failed to build the SAM 2 CUDA extension` during installation, you can ignore it and still use SAM 2 (some post-processing functionality may be limited, but it doesn't affect the results in most cases).
 
+### Install Annotation and Visualization Interfaces
+
+After installing **SAM2**, **Depth-Pro**, and this project's Python dependencies, you also need to set up the two interactive interfaces for annotation and visualization: [**flymethrough-annotator**](https://github.com/makeabilitylab/flymethrough-annotator) and [**flymethrough-visualization**](https://github.com/XiaSu0919/flymethrough-webdemo).
+
+We recommend cloning and running them inside the same `flymethrough` directory.
+
+#### flymethrough-annotator
+```bash
+git clone https://github.com/makeabilitylab/flymethrough-annotator.git
+cd flymethrough-annotator
+npm install
+npm start
+```
+
+#### flymethrough-visualization
+```bash
+git clone https://github.com/XiaSu0919/flymethrough-webdemo.git
+cd flymethrough-webdemo
+npm install
+npm start
+```
+
+Both interfaces are **Node.js applications**, and require [Node.js](https://nodejs.org/) (v14 or higher) and `npm` to be installed on your machine.  
+Running `npm start` will launch the interface in development mode, usually accessible at [http://localhost:3000/](http://localhost:3000/) (or another port, as indicated in the terminal).
+
+For more details about the implementation and usage of each interface, please refer to their respective repositories.
 
 
 ## Run the pipeline on a single scene
@@ -168,7 +194,8 @@ python diamserver/DIAMserver.py
 # Start the SAM2 server
 python sam2server/sam2server.py
 ```
-After starting both servers, you can open the annotation and visualization interfaces and start exploring the system!
+After starting both servers, launch the annotation and visualization interfaces as described above (For details, please refer to *Install Annotation and Visualization Interfaces*). 
+Once everything is running, you can freely use our system on your own scene data! 
 
 ## Acknowledgments
 
