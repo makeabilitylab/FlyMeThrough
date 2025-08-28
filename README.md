@@ -19,7 +19,7 @@
 <h2 align="center">UIST 2025</h2>
 
 <h3 align="center">
-  <a href="#">Paper</a> | <a href="https://makeabilitylab.cs.washington.edu/project/flymethrough/">Website</a>
+  <a href="https://arxiv.org/abs/2508.20034v1">Paper</a> | <a href="https://makeabilitylab.cs.washington.edu/project/flymethrough/">Website</a>
 </h3>
 
 </p>
